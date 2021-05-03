@@ -1,0 +1,93 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <meta charset="UTF-8">
+    <title>Index_test</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'CSS/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'CSS/index-original.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'CSS/all.min.css' %}">
+    <script src="{% static 'JS/jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'JS/bootstrap.min.js' %}"></script>
+    <script src="{% static 'JS/echarts5.0.2.js' %}"></script>
+</head>
+<body>
+{% if location_list %}
+
+<div class="topNav">
+    <ul class="top">
+        <li class="Time">{{ current_time }}</li>
+        <li class="mouse">
+            <div class="dropdown">
+                <button class="dropbtn">Location</button>
+                    <div class="dropdown-content">
+                        {% for location in location_list %}
+                        <a href="{{ location.id }}">{{ location.location_name }}</a>
+                        {% endfor %}
+                    </div>
+            </div>
+
+        </li>
+        <li class="mouse">Login</li>
+        <li class="mouse">Home</li>
+    </ul>
+</div>
+
+{% endif %}
+
+<br/>
+<br/>
+<br/>
+<hr />
+
+<div class="container" >
+	<div class="row">
+		<div class="col-md-4" style="font-size: 80px">
+            Welcome!
+		</div>
+		<div class="col-md-4">
+            <div id="main" style="height: 600px; width: 600px"></div>
+		</div>
+		<div class="col-md-4">
+		</div>
+	</div>
+</div>
+
+{#<div id="main"></div>#}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="bottomBG">
+    <ul class="bottom">
+        <li>Copyright</li>
+    </ul>
+</div>
+
+
+    <script src="{% static 'JS/index_clock.js' %}"></script>
+
+
+
+
+
+</body>
+</html>

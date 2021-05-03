@@ -1,0 +1,71 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+{#    <meta http-equiv="X-UA-Compatible" content="IE=edge">#}
+{#    <meta name="viewport" content="width=device-width, initial-scale=1.0">#}
+    <title>homepage</title>
+      <script src="{% static 'JS/jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'JS/echarts5.0.2.js' %}"></script>
+    <script src="{% static 'JS/data-update.js' %}"></script>
+    <script src="{% static 'JS/popper.min.js' %}"></script>
+    <script src="{% static 'JS/bootstrap-4.4.1.js' %}"></script>
+    <link href="{% static 'CSS/bootstrap-4.4.1.css'%}" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="{% static 'CSS/all.min.css' %}">
+    <link href="{% static 'CSS/base-location.css' %}" rel="stylesheet" type="text/css">
+
+</head>
+<body>
+
+
+
+{% if location_list %}
+
+<table width="100%" border="0">
+  <tbody>
+    <tr class="header">
+      <td height="50px" colspan="2"><li class="Time">{{ current_time }}</li></td>
+    </tr>
+    <tr>
+      <td width="150px" height="1820px" >
+
+	    <ul class="nav nav-pills nav flex-column navbar-dark" id="sidebar">
+            <li class="nav-item"> <a class="nav-link" href="/main/">Home</a> </li>
+		   <li class="nav-item"> <a class="nav-link" href="/main/admin/">Login</a> </li>
+		   <li class="nav-item dropdown" id="dropdown">
+               <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
+                  aria-expanded="false">Location</a>
+		        <div class="dropdown-menu">
+
+                       {% for location in location_list %}
+                           <a class="dropdown-item" href="{% url 'detail' location.id %}">Room:{{ location.location_name }}</a>
+                            <div><hr class="nav-link-separator"></div>
+                        {% endfor %}
+                </div>
+		       <div class="dropdown-divider"></div>
+           </li>
+		   <li class="nav-item"> <a class="nav-link" href="#">need to do</a> </li>
+        </ul>
+
+
+
+      </td>
+      <td width="930px">
+
+          {% block container %}
+
+              <h1  style="position: absolute; top: 200px; font-size: 100px; "> Welcome! </h1>
+
+          {% endblock %}
+  </td>
+    </tr>
+    <tr class="footer">
+      <td height="50px" colspan="2">footer</td>
+    </tr>
+  </tbody>
+</table>
+
+{% endif %}
+</body>
+</html>

@@ -1,0 +1,90 @@
+* {
+    /*padding: 0;*/
+    /*margin: 0;*/
+    font-size: 18px;
+    list-style: none;
+    font-family: "Helvetica";
+}
+
+
+body {
+    margin: 0 auto;
+    padding: 0;
+    background-color: #eeeeee;
+}
+
+
+.html {
+	position: relative;
+
+}
+
+.header {
+    color: #eeeeee;
+    background-color: #333;
+    margin: 0 auto;
+}
+.Time {
+
+    float: right;
+    padding-right: 30px;
+}
+
+
+
+#sidebar {
+    background-color: #d5d5d5;
+    height: 1820px;
+	position: absolute;
+	top: 50px;
+	left: 0px;
+    /*bottom: 0px;*/
+
+
+}
+
+.nav-pills .nav-link.active {
+    color: #fff;
+    background-color: #17a2b8;
+}
+
+a {
+    color: #333333;
+
+}
+
+
+.nav-link-separator{
+  border-top: 1px solid #dedfe0;
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+
+#deck-container {
+	position: absolute;
+	top:200px;
+
+
+}
+
+.card {
+	border-radius: 10px;
+	padding: 0px;
+
+}
+
+.content-widget{
+    margin-left: 50px;
+    line-height: 120px;
+}
+
+
+.footer {
+    color: #eeeeee;
+    background-color: #333;
+    margin: 0 auto;
+}
+
+
+

@@ -1,0 +1,52 @@
+{% extends 'main/base.html' %}
+
+{% block container %}
+
+      <div class="container" id="deck-container">
+			  <div class="card-deck">
+
+
+		<div class="card col-md-5" >
+        <div class="card-header bg-info"> Location: {{ required_location_name }} </div>
+        <div class="card-body">
+
+			<ul>
+				 <li class="content-widget">
+                    <i class="far fa-thermometer-half fa-3x"> {{ show_information.temperature }}°c</i>
+                 </li>
+                <li class="content-widget">
+                    <i class="far fa-humidity fa-3x"> {{ show_information.humidity }}%</i>
+                 </li>
+
+			</ul>
+
+
+        </div>
+      </div>
+
+		<div class="card  col-md-5" >
+        <div class="card-header bg-info" > Control</div>
+            <div class="card-body">
+
+            <li class="content-widget">
+                <i class="far fa-temperature-frigid fa-3x">&nbsp&nbsp</i>
+                <i class="far fa-toggle-on fa-3x" id="acswitch" onclick="">&nbsp&nbsp</i>
+                <i class="far fa-temperature-hot fa-3x"></i>
+            </li>
+            <li class="content-widget">
+                <i class="far fa-chevron-circle-down fa-3x" id="adjustdown" onclick="">&nbsp{{ show_information.temperature_expected }}°c&nbsp</i>
+
+                <i class="far fa-chevron-circle-up fa-3x" id="adjustup" onclick=""></i>
+
+            </li>
+
+
+            </div>
+      </div>
+			  </div>
+
+
+
+		  </div>
+
+{% endblock %}
