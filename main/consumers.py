@@ -1,142 +1,77 @@
 import json
-import logging
-from urllib import parse as urlparse
-from datetime import datetime
-
-from django.db.models.signals import post_save
-from channels.generic.websocket import JsonWebsocketConsumer
-
-from .models import Datapoint
-# from .apps import EmpAppsCache
-# from .utils import datetime_to_pretty_str
-
-logger = logging.getLogger(__name__)
+from channels.generic.websocket import WebsocketConsumer
+from django.shortcuts import get_object_or_404
+from main.models import Location, Datapoint
+from time import sleep
+from random import random
+from datetime import datetime, timezone
+from decimal import Decimal
+import time
 
 
-class DatapointUpdate(JsonWebsocketConsumer):
-    """
-    A consumer that sends updates of Datapoint fields via websocket to the
-    user.
-
-    Manuelly test with:
-    Execute in browser development console:
-        ws = new WebSocket("ws://localhost:8000/ws/datapoint-update/?datapoint-ids=[1,2]");
-        ws.onmessage = function(msg){console.log(JSON.parse(msg.data))}
-    Change the value of http://localhost:8000/admin/emp_main/datapoint/
-    in the admin panel.
-    """
-
+class DatapointUpdate(WebsocketConsumer):
     def connect(self):
-        """
-        Accept every connection and compute the ids of datapoints the user is
-        permitted to receive updates for.
-        """
-        self.user = self.scope["user"]
         self.accept()
-        logger.debug(
-            "DatapointUpdate consumer accepted connection from user=%s",
-            self.user
-        )
 
-        # Parse the set of requested datapoints from the query string.
-        try:
-            query_string = self.scope["query_string"].decode('utf8')
-            query_string_parsed = urlparse.parse_qs(query_string)
-            # if the query string looks like this: ?datapoint-ids=[1,2]"
-            # then the query_string_parsed object looks like this:
-            # {'datapoint-ids': ['[1,2]']}
-            datapoint_ids_qs_json = query_string_parsed["datapoint-ids"][0]
-            requested_dp_ids = set(json.loads(datapoint_ids_qs_json))
-        except:
-            logging.exception(
-                "DatapointUpdate consumer received object not translatable "
-                "into requested datapoint ids by user=%s.",
-                self.user
+    def disconnect(self, code):
+        pass
+
+    # def receive(self, text_data=None, bytes_data=None):
+    #     text_data_python = json.loads(text_data)
+    #     # loads函数将json对象转为python对象
+    #     message = '小仓优香' + text_data_python['message']
+    #
+    #     self.send(text_data=json.dumps(
+    #         {
+    #             'message': message
+    #         }
+    #     )
+    #
+    #     )
+
+    def receive(self, text_data=None, bytes_data=None):
+        location_id_python = json.loads(text_data)
+        # loads函数将json对象转为python对象,是个字典
+        location_id = location_id_python['id']
+        required_location = get_object_or_404(Location, id=location_id)
+        datapoint_list = required_location.datapoint_set.all()
+        datapoint = datapoint_list[0]
+
+        # self.send(text_data=json.dumps(
+        #         {
+        #             # 'humidity': datapoint.humidity+5,
+        #             # 'temperature': datapoint.temperature+5,
+        #             'temperature': 'sss',
+        #             'humidity': str(datapoint.humidity),
+        #             # 必须要转一下格式，因为python字典不支持decimal格式，可以转成字符串
+        #             # 在html页面解析时数据格式可能会出问题
+        #         }
+        #     )
+        #
+        #     )
+
+        while True:
+            value = round(22 + random() * 3, 1)
+            datapoint.temperature = round(Decimal.from_float(value), 1)
+            datapoint.humidity = round(Decimal.from_float(value+20), 1)
+            # 格式化成2016-03-20 11:45:39形式
+            current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+            self.send(text_data=json.dumps(
+                {
+                    'humidity': str(datapoint.humidity),
+                    'temperature': str(datapoint.temperature),
+                    'time': str(current_time),
+                }
             )
-            raise
 
-        # Compute the set of all datapoint ids for which the user has
-        # permissions.
-        apps_cache = EmpAppsCache.get_instance()
-        dp_ids = apps_cache.get_allowed_datapoint_ids_for_user(self.user)
-        all_allowed_dp_ids = set(dp_ids)
-
-        # Update permitted ids to trigger that updates for those datapoints
-        # are forwarded to the client.
-        permitted_ids = all_allowed_dp_ids.intersection(requested_dp_ids)
-        self.permitted_datapoint_ids = permitted_ids
-        logger.debug(
-            "DatapointUpdate consumer updated permitted ids for user=%s "
-            "to datapoints=%s",
-            *(self.user, permitted_ids)
-        )
-
-        # Check if the client requested ids he has no permissions for.
-        # This should usually not happen if a user opens a normal web page
-        # but only if people start playing around with the websocket manually.
-        denied_ids = requested_dp_ids.difference(all_allowed_dp_ids)
-        if denied_ids:
-            logger.warning(
-                "DatapointUpdate consumer denied user=%s access to the"
-                "datapoints=%s",
-                *(self.user, denied_ids)
             )
 
-        # Connect to datapoint signal so this consumer can send the updated
-        # data of that datapoint to the user. Use a dispatch uid for signals,
-        # so we disconnect from the correct signal on disconnect.
-        self.post_save_uid = "post_save" + str(id(self))
-        post_save.connect(
-            self.send_datapoint_update_to_client,
-            sender=Datapoint,
-            dispatch_uid=self.post_save_uid
-        )
+            datapoint.save()
 
-    def send_datapoint_update_to_client(self, sender, **kwargs):
-        """
-        Sends a JSON version of a changed datapoint via Websocket to the
-        lient.
+            sleep(5)
 
-        TODO: Use a proper serializer.
-        """
-        logger.debug(
-            "DatapointUpdate consumer got datapoint update %s",
-            kwargs
-        )
+            # datapoint.save 可以写在send之前吗，也就是说save之后，当前的datapoint会被关闭吗，还可以继续操作码？
+            # 在send函数中 text_data 参数可以换成别的吗？为什么跟接收到的函数是一样的？？
+            # 必须要转一下格式，因为python字典不支持decimal格式，可以转成字符串
 
-        # Be aware that this datapoint is not the object from the
-        # database but the object that was created by the method that
-        # updated or created the datapoint. I.e. if the method wrote a
-        # number to a text field it will still be a number here. If that is an
-        # issue you can circumvent this by reloading the object from the DB.
-        # Only then the number will be converter to a text.
-        datapoint = kwargs["instance"]
-
-        if datapoint.id not in self.permitted_datapoint_ids:
-            return
-        dp_field_values = {}
-        for field in datapoint._meta.fields:
-            field_value = getattr(datapoint, field.name)
-            # JSON can't carry datetime objects.
-            if isinstance(field_value, datetime):
-                field_value = datetime_to_pretty_str(field_value)
-
-            dp_field_values[field.name] = field_value
-        self.send_json(dp_field_values)
-
-
-    def disconnect(self, close_code):
-        """
-        Disconnect from signal.
-        """
-        # Apparently it is necessary to use the exact same arguments as for
-        # connect here to disconnect successfully.
-        post_save.disconnect(
-            self.send_datapoint_update_to_client,
-            sender=Datapoint,
-            dispatch_uid=self.post_save_uid
-        )
-        logger.debug(
-            "DatapointUpdate consumer disconnected for user=%s",
-            self.user
-        )

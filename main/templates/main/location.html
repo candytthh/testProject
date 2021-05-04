@@ -1,5 +1,13 @@
 {% extends 'main/base.html' %}
 
+ {% block title %}
+         <title>Location</title>
+    {% endblock %}
+
+ {% block time %}
+          <li class="Time" id="show-time">{{ current_time }}</li>
+ {% endblock %}
+
 {% block container %}
 
       <div class="container" id="deck-container">
@@ -12,14 +20,13 @@
 
 			<ul>
 				 <li class="content-widget">
-                    <i class="far fa-thermometer-half fa-3x"> {{ show_information.temperature }}°c</i>
+                    <i class="far fa-thermometer-half fa-3x" id="show-temperature"> &nbsp;&nbsp;{{ show_information.temperature }}°c</i>
                  </li>
                 <li class="content-widget">
-                    <i class="far fa-humidity fa-3x"> {{ show_information.humidity }}%</i>
+                    <i class="far fa-humidity fa-3x" id="show-humidity"> &nbsp;&nbsp;{{ show_information.humidity }}%</i>
                  </li>
 
 			</ul>
-
 
         </div>
       </div>
@@ -45,8 +52,47 @@
       </div>
 			  </div>
 
-
-
 		  </div>
+
+    <script>
+
+    var dpupdateSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/dpupdate'
+    );
+
+    dpupdateSocket.onopen = function ()
+    {
+         {#window.alert("连接建立...");#}
+
+        dpupdateSocket.send(JSON.stringify(
+            {
+                'id': {{ location_id }},
+            }
+        ));
+
+        {#window.alert("已经发送...");#}
+
+    }
+
+     {#为什么send方法必须跟dom对象绑定啊？,把它绑到onopen消息里也可以#}
+
+    dpupdateSocket.onmessage = function (e) {
+        {#window.alert("onmessage触发...");#}
+        var data = JSON.parse(e.data);
+        var temperature_show = data['temperature'];
+        var humidity_show = data['humidity'];
+        var show_time = data['time'];
+        document.getElementById("show-temperature").innerText= '  ' + temperature_show;
+        document.getElementById("show-humidity").innerText = '  ' + humidity_show;
+        document.getElementById("show-time").innerText = show_time;
+
+
+    };
+
+    dpupdateSocket.onclose = function (e) {
+        console.error("Socket 被关闭了");
+    };
+
+    </script>
 
 {% endblock %}

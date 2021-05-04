@@ -1,0 +1,65 @@
+{% extends 'main/base.html' %}
+
+    {% block title %}
+         <title>test</title>
+    {% endblock %}
+
+{% block container %}
+
+  <textarea class="form-control" id="chat-log" disabled rows="20">温度是{{ show_information.temperature }}
+  湿度是{{ show_information.humidity }}
+  </textarea> <br/>
+  <input class="form-control" id="chat-message-input" type="text"/> <br/>
+  <input class="btn btn-success btn-block" id="chat-message-submit" type="button" value="Send"/>
+
+
+
+    <script>
+    var dpupdateSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/dpupdate'
+    );
+    window.alert("连接建立...");
+
+    dpupdateSocket.onmessage = function (e) {
+        window.alert("onmessage触发...");
+        var data = JSON.parse(e.data);
+        var temperature_show = data['temperature'];
+        var humidity_show = data['humidity'];
+        document.querySelector('#chat-log').value += ('温度是：' + temperature_show + '湿度是：' + humidity_show + '\n');
+
+    };
+
+    dpupdateSocket.onclose = function (e) {
+        console.error("Socket 被关闭了");
+    };
+
+    {#document.querySelector('#chat-message-input').focus();#}
+    {#document.querySelector('#chat-message-input').onkeyup = function (e) {#}
+    {#    if (e.keyCode === 13) {#}
+    {#        document.querySelector('#chat-message-submit').click();#}
+    {#    }#}
+    {#};#}
+
+
+    document.querySelector('#chat-message-submit').onclick = function (e) {
+        var messageInputDom = document.querySelector('#chat-message-input');
+        var message = messageInputDom.value;
+        dpupdateSocket.send(JSON.stringify(
+            {
+                'id': 1,
+            }
+        ));
+        window.alert("已经发送...");
+
+        messageInputDom.value = '';
+
+    }
+
+
+</script>
+
+
+
+{% endblock %}
+
+

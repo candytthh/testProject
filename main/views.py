@@ -1,8 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-# from django.template import loader
 from .models import Location, Datapoint
-from random import random
-from time import sleep
 import time
 # Create your views here.
 
@@ -34,36 +31,17 @@ def detail(request, location_id):
     current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     # temperature_show = required_location.
     return render(request, 'main/location.html', locals())
-    # return render(request, 'main/base.html', locals())
 
 
-def push_data(self):
-    pass
-
-
-def detail1(request, location_id):
+def socket_test(request):
     location_list = Location.objects.all
-    required_location = get_object_or_404(Location, id=location_id)
+    required_location = get_object_or_404(Location, id=1)
     required_location_name = required_location.location_name
-    # 拿到datapoint表中的所有实例，因为前面指定了location，所以其实只有一个，但是返回是个列表，所以该列表只有一个数据。
     show_information_list = required_location.datapoint_set.all()
-    # 显示出这个列表中的第一个数据，也就是唯一的数据
+    # 这里虽然是个列表，但是其实只有一项，就是location id匹配的那个datapoint
     show_information = show_information_list[0]
-    # 格式化成2016-03-20 11:45:39形式
-    current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    # current_time 也需要用websocket 来实时显示啊
+    return render(request, 'main/test.html', locals())
 
-    while True:
-        value = round(22 + random() * 3, 1)
-        # timestamp_as_dt = datetime.utcnow().astimezone(timezone.utc)
-        show_information.temperature = value
-        show_information.save(update_fields=["temperature"])
-
-
-        sleep(5)
-
-    # temperature_show = required_location.
-    return render(request, 'main/location.html', locals())
 
 
 
